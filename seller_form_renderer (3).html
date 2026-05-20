@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Seller Information Form</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#f5f5f3;color:#1a1a1a;font-size:15px;line-height:1.7}
+.page{max-width:700px;margin:0 auto;padding:2rem 1.25rem 4rem}
+.agency{font-size:12px;color:#999;letter-spacing:.05em;text-transform:uppercase;margin-bottom:1.5rem}
+h1{font-size:22px;font-weight:600;margin-bottom:.3rem}
+.intro{font-size:14px;color:#666;margin-bottom:2rem;line-height:1.6}
+.card{background:#fff;border-radius:12px;padding:1.5rem 1.75rem;margin-bottom:1.25rem;border:1px solid #e8e8e4}
+.item-label{font-size:11px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:#bbb;margin-bottom:.6rem}
+p.body{font-size:14.5px;color:#2a2a2a;line-height:1.75;margin-bottom:.5rem}
+p.body strong{color:#1a1a1a;font-weight:600}
+p.body a{color:#185FA5;text-decoration:underline}
+ul.doclist{margin:.5rem 0 1rem 0;padding:0;list-style:none}
+ul.doclist li{font-size:14px;color:#2a2a2a;line-height:1.65;padding:.35rem 0 .35rem 1.1rem;border-bottom:1px solid #f2f2ee;position:relative}
+ul.doclist li:last-child{border-bottom:none}
+ul.doclist li::before{content:"•";position:absolute;left:0;color:#378ADD}
+ul.doclist li strong{font-weight:600}
+.sec-head{font-size:12px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:#999;margin:1.5rem 0 .75rem;padding-bottom:.5rem;border-bottom:1px solid #eee}
+.q-block{background:#f7f7f4;border:1.5px solid #e4e4df;border-radius:9px;padding:1rem 1.1rem;margin-top:.75rem}
+.q-block label{display:block;font-size:12px;font-weight:600;color:#555;margin-bottom:.45rem;letter-spacing:.03em}
+input[type=text],input[type=date],textarea{width:100%;padding:9px 12px;border:1.5px solid #ddddd8;border-radius:7px;font-size:14px;font-family:inherit;color:#1a1a1a;background:#fff;transition:border-color .15s}
+input:focus,textarea:focus{outline:none;border-color:#378ADD}
+textarea{min-height:72px;resize:vertical}
+.ffield+.ffield{margin-top:.65rem}
+.name-dob-row{display:grid;grid-template-columns:1fr 1fr;gap:.65rem}
+.radio-row{display:flex;gap:8px;flex-wrap:wrap}
+.fro{display:flex;align-items:center;gap:7px;padding:8px 16px;border:1.5px solid #ddddd8;border-radius:7px;cursor:pointer;font-size:14px;background:#fff;transition:all .15s;user-select:none}
+.fro:hover{border-color:#aaa}
+.fro input{display:none}
+.fro.sel{border-color:#378ADD;background:#EDF5FC;color:#185FA5;font-weight:500}
+.check-row{display:flex;gap:12px;flex-wrap:wrap;margin-top:.4rem}
+.fck{display:flex;align-items:center;gap:6px;font-size:14px;cursor:pointer}
+.day-row{display:flex;flex-wrap:wrap;gap:6px;margin-top:.45rem}
+.day-chip{padding:6px 12px;border:1.5px solid #ddddd8;border-radius:20px;font-size:13px;cursor:pointer;background:#fff;user-select:none;transition:all .15s}
+.day-chip:hover{border-color:#aaa}
+.day-chip.sel{border-color:#378ADD;background:#EDF5FC;color:#185FA5;font-weight:500}
+.submit-area{margin-top:2.5rem;text-align:center}
+button[type=submit]{background:#1a1a1a;color:#fff;border:none;padding:14px 0;border-radius:10px;font-size:15px;font-weight:500;cursor:pointer;font-family:inherit;width:100%;max-width:340px;transition:background .15s}
+button[type=submit]:hover{background:#333}
+.thanks{display:none;background:#EAF3DE;border:1.5px solid #C0DD97;border-radius:12px;padding:2rem;text-align:center;color:#27500A;margin-top:1.5rem}
+.thanks h3{font-size:20px;margin-bottom:.5rem;font-weight:600}
+.thanks p{font-size:14px}
+.loading{text-align:center;padding:4rem;color:#999;font-size:14px}
+.error{text-align:center;padding:4rem;color:#A32D2D;font-size:14px}
+</style>
+</head>
+<body>
+<div class="page" id="page">
+<div class="loading">Loading your form...</div>
+</div>
+<script>
+function esc(s){
+  return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+    .replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>')
+    .replace(/\[(https?:\/\/[^\]]+)\]/g,'<a href="$1" target="_blank">$1</a>');
+}
+
+function renderForm(d){
+  var page=document.getElementById('page');
+  var agentName=d.agentName||'Your Agent';
+  var asstName=d.asstName||'';
+  var asstFirst=asstName?asstName.split(' ')[0]:'';
+  var sellerName=d.sellerName||'Seller';
+  var formspreeUrl=d.formspreeUrl||'';
+  var items=d.items||[];
+
+  var html='';
+  html+='<div class="agency">'+esc(agentName)+' Real Estate</div>';
+  html+='<p class="intro">Please read through each item below. Where you see a response box, fill in your answer directly. When complete, click Submit and your responses will go straight to '+esc(agentName)+(asstName?' and '+esc(asstName):'')+'.</p>';
+  html+='<form id="sf">';
+  html+='<input type="hidden" name="_subject" value="Seller Form Response — '+esc(sellerName)+'">';
+  if(d.asstEmail) html+='<input type="hidden" name="_cc" value="'+esc(d.asstEmail)+'">';
+
+  var itemIdx=0;
+  var inBul=false;
+  var openCard=false;
+
+  function closeBul(){if(inBul){html+='</ul>';inBul=false;}}
+  function closeCard(){if(openCard){html+='</div>';openCard=false;}}
+
+  items.forEach(function(item){
+    if(item.type==='blank') return;
+    if(item.type==='heading'){closeBul();closeCard();html+='<h1>'+esc(item.text)+'</h1>';return;}
+    if(item.type==='sectionhead'){closeBul();closeCard();html+='<div class="sec-head">'+esc(item.text)+'</div>';return;}
+    if(item.type==='bullet'){if(!inBul){html+='<ul class="doclist">';inBul=true;}html+='<li>'+esc(item.text)+'</li>';return;}
+    closeBul();
+
+    if(item.type==='para'){
+      closeCard();itemIdx++;
+      html+='<div class="card"><div class="item-label">Item '+itemIdx+'</div><p class="body">'+esc(item.text)+'</p>';
+      openCard=true;return;
+    }
+
+    if(item.type==='_docusign_q'){
+      html+='<div class="q-block"><label>How would you like to proceed?</label>'
+        +'<div class="radio-row"><label class="fro"><input type="radio" name="docs_pref" value="Ready to sign via DocuSign">Ready to sign via DocuSign</label>'
+        +'<label class="fro"><input type="radio" name="docs_pref" value="Id like to go over them first">I\'d like to go over them first</label></div>'
+        +'<div id="avail_wrap" style="display:none;margin-top:.9rem">'
+        +'<label>Which days work for a call?</label>'
+        +'<div class="day-row"><span class="day-chip" data-day="Monday">Monday</span><span class="day-chip" data-day="Tuesday">Tuesday</span><span class="day-chip" data-day="Wednesday">Wednesday</span><span class="day-chip" data-day="Thursday">Thursday</span><span class="day-chip" data-day="Friday">Friday</span><span class="day-chip" data-day="Saturday">Saturday</span></div>'
+        +'<input type="hidden" name="available_days" id="avail_days_inp">'
+        +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:.65rem;margin-top:.65rem"><div><label>Earliest time</label><input type="text" name="call_earliest" placeholder="e.g. 9:00 AM"></div><div><label>Latest time</label><input type="text" name="call_latest" placeholder="e.g. 5:00 PM"></div></div>'
+        +'<div style="margin-top:.65rem"><label>Best phone number</label><input type="text" name="call_phone" placeholder="e.g. (512) 555-0100"></div>'
+        +'</div></div>';
+      closeCard();openCard=false;return;
+    }
+    if(item.type==='_excl_q'){
+      closeCard();openCard=false;
+      html+='<div class="card" style="background:#fafaf8"><div class="q-block">'
+        +'<label>Items you plan to EXCLUDE from the sale</label>'
+        +'<textarea name="exclusions" placeholder="e.g. Dining room chandelier, mounted TV in living room"></textarea>'
+        +'<div style="margin-top:.65rem"><label>Appliances you plan to take</label>'
+        +'<div class="check-row"><label class="fck"><input type="checkbox" name="appl_fridge" value="Yes"> Refrigerator</label>'
+        +'<label class="fck"><input type="checkbox" name="appl_washer" value="Yes"> Washer</label>'
+        +'<label class="fck"><input type="checkbox" name="appl_dryer" value="Yes"> Dryer</label></div>'
+        +'</div></div></div>';return;
+    }
+    if(item.type==='_shield_q'){
+      html+='<div class="q-block"><label>First name of seller who should receive Seller\'s Shield first</label>'
+        +'<input type="text" name="sellers_shield_who" placeholder="First name"></div>';
+      closeCard();openCard=false;return;
+    }
+    if(item.type==='_birthday_q'){
+      html+='<div class="q-block">'
+        +'<div class="name-dob-row"><div><label>Seller 1 — First name</label><input type="text" name="seller1_firstname" placeholder="First name"></div>'
+        +'<div><label>Seller 1 — Date of birth</label><input type="date" name="dob_seller1"></div></div>';
+      if(item.multi){
+        html+='<div class="name-dob-row" style="margin-top:.65rem"><div><label>Seller 2 — First name</label><input type="text" name="seller2_firstname" placeholder="First name"></div>'
+          +'<div><label>Seller 2 — Date of birth</label><input type="date" name="dob_seller2"></div></div>';
+      }
+      html+='</div>';
+      closeCard();openCard=false;return;
+    }
+    if(item.type==='_survey_impr_q'){
+      html+='<div class="q-block"><label>Please describe improvements made since the survey</label>'
+        +'<textarea name="survey_improvements" placeholder="e.g. Added pool 2021, new fence 2022"></textarea></div>';
+      closeCard();openCard=false;return;
+    }
+    if(item.type==='_util_q'){
+      html+='<div class="q-block">'
+        +'<div class="ffield"><label>Average annual electricity cost</label><input type="text" name="util_electric" placeholder="e.g. $2,400/year"></div>'
+        +'<div class="ffield"><label>Average annual water cost</label><input type="text" name="util_water" placeholder="e.g. $800/year"></div>'
+        +'<div class="ffield"><label>Average annual gas cost (if applicable)</label><input type="text" name="util_gas" placeholder="e.g. $600/year or N/A"></div>'
+        +'</div>';
+      closeCard();openCard=false;return;
+    }
+    if(item.type==='_impr_q'){
+      html+='<div class="q-block">'
+        +'<div class="ffield"><label>Approximate age of roof</label><input type="text" name="roof_age" placeholder="e.g. 8 years, replaced 2017"></div>'
+        +'<div class="ffield"><label>Approximate age of HVAC system(s)</label><input type="text" name="hvac_age" placeholder="e.g. 5 years"></div>'
+        +'<div class="ffield"><label>Approximate age of water heater(s)</label><input type="text" name="wh_age" placeholder="e.g. 3 years"></div>'
+        +'<div class="ffield"><label>Other recent upgrades or improvements</label><textarea name="upgrades" placeholder="e.g. New flooring 2022, kitchen remodel 2023"></textarea></div>'
+        +'</div>';
+      closeCard();openCard=false;return;
+    }
+    if(item.type==='_payoff_q'){
+      html+='<div class="q-block"><label>Approximate mortgage payoff amount (kept completely confidential)</label>'
+        +'<input type="text" name="payoff" placeholder="e.g. $350,000"></div>';
+      closeCard();openCard=false;return;
+    }
+    if(item.type==='_photo_q'){
+      html+='<div class="q-block">'
+        +'<div class="ffield"><label>Estimated date you\'ll be ready for photos</label><input type="date" name="photo_ready_date"></div>'
+        +'<div class="ffield"><label>Any notes about scheduling or access</label><input type="text" name="photo_notes" placeholder="e.g. Best in mornings, need 48 hrs notice"></div>'
+        +'</div>';
+      closeCard();openCard=false;return;
+    }
+    if(item.type==='_key_q'){
+      html+='<div class="q-block"><label>How can we get the key from you?</label>'
+        +'<input type="text" name="key_handoff" placeholder="e.g. I\'ll drop it off, you can pick it up at the property…"></div>';
+      closeCard();openCard=false;return;
+    }
+    if(item.type==='_hoa_q'){
+      html+='<div class="q-block"><label>Any questions about the HOA doc process?</label>'
+        +'<textarea name="hoa_questions" placeholder="Leave blank if you\'re all set, or type your question here"></textarea></div>';
+      closeCard();openCard=false;return;
+    }
+    if(item.type==='_showingtime_q'){
+      html+='<div class="q-block"><label>Would you like a courtesy notification when an agent books a showing?</label>'
+        +'<div class="radio-row"><label class="fro"><input type="radio" name="showingtime_notif" value="Yes — please notify me">Yes, notify me</label>'
+        +'<label class="fro"><input type="radio" name="showingtime_notif" value="No — auto-approve silently">No, auto-approve silently</label></div></div>';
+      closeCard();openCard=false;return;
+    }
+    if(item.type==='_showing_q'){
+      html+='<div class="q-block"><label>Are there any days or times showings are NOT allowed?</label>'
+        +'<input type="text" name="showing_restrictions" placeholder="e.g. No showings on Sundays before noon"></div>';
+      closeCard();openCard=false;return;
+    }
+    if(item.type==='_ecad_q'){
+      html+='<div class="q-block">'
+        +'<div class="ffield"><label>Has it been determined whether an ECAD report is required for your property?</label>'
+        +'<div class="radio-row"><label class="fro"><input type="radio" name="ecad_required" value="Yes — required">Yes, required</label>'
+        +'<label class="fro"><input type="radio" name="ecad_required" value="No — not required">No, not required</label>'
+        +'<label class="fro"><input type="radio" name="ecad_required" value="Not sure yet">Not sure yet</label></div></div>'
+        +'<div class="ffield" style="margin-top:.65rem"><label>Have you ordered the ECAD report yet?</label>'
+        +'<div class="radio-row"><label class="fro"><input type="radio" name="ecad_ordered" value="Yes — ordered">Yes, ordered</label>'
+        +'<label class="fro"><input type="radio" name="ecad_ordered" value="No — not yet">No, not yet</label></div></div>'
+        +'</div>';
+      closeCard();openCard=false;return;
+    }
+  });
+
+  closeBul();closeCard();
+
+  html+='<div class="card" style="background:#fafaf8"><div class="q-block">'
+    +'<label>Is there anything else you\'d like us to know?</label>'
+    +'<textarea name="other_notes" placeholder="Any questions, concerns, or details about the property or the sale…"></textarea>'
+    +'</div></div>';
+
+  html+='<div class="submit-area"><button type="submit">Submit to '+esc(agentName)+(asstFirst?' &amp; '+esc(asstFirst):'')+'</button></div>';
+  html+='<div class="thanks" id="thanks"><h3>Thank you!</h3><p>Your responses have been sent to '+esc(agentName)+(asstName?' and '+esc(asstName):'')+'.</p></div>';
+  html+='</form>';
+
+  page.innerHTML=html;
+  document.title='Seller Information — '+sellerName;
+
+  document.querySelectorAll('.fro').forEach(function(o){
+    o.addEventListener('click',function(){
+      var i=this.querySelector('input');i.checked=true;
+      document.querySelectorAll('input[name="'+i.name+'"]').forEach(function(x){x.closest('.fro').classList.remove('sel');});
+      this.classList.add('sel');
+      if(i.name==='docs_pref'){document.getElementById('avail_wrap').style.display=i.value.includes('go over')?'block':'none';}
+    });
+  });
+
+  var sd=new Set();
+  document.querySelectorAll('.day-chip').forEach(function(c){
+    c.addEventListener('click',function(){
+      var dv=this.dataset.day;
+      if(sd.has(dv)){sd.delete(dv);this.classList.remove('sel');}else{sd.add(dv);this.classList.add('sel');}
+      var inp=document.getElementById('avail_days_inp');if(inp)inp.value=[...sd].join(', ');
+    });
+  });
+
+  document.getElementById('sf').addEventListener('submit',async function(e){
+    e.preventDefault();
+    var btn=this.querySelector('button[type=submit]');
+    btn.textContent='Sending…';btn.disabled=true;
+    try{
+      var res=await fetch(formspreeUrl,{method:'POST',body:new FormData(this),headers:{Accept:'application/json'}});
+      if(res.ok){this.style.display='none';document.getElementById('thanks').style.display='block';}
+      else{btn.textContent='Submit';btn.disabled=false;alert('Something went wrong — please try again.');}
+    }catch(e){btn.textContent='Submit';btn.disabled=false;alert('Something went wrong — please try again.');}
+  });
+}
+
+try{
+  var hash=window.location.hash.slice(1);
+  if(!hash) throw new Error('no data');
+  var decoded=atob(hash);
+  var data=JSON.parse(decoded);
+  renderForm(data);
+}catch(e){
+  document.getElementById('page').innerHTML='<div class="error">This link appears to be invalid or expired. Please contact your agent for a new link.</div>';
+}
+</script>
+</body>
+</html>
